@@ -1,4 +1,3 @@
-'
 
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
@@ -34,7 +33,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+(setq doom-theme 'tokyo-night)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -186,3 +185,142 @@
   :ensure t
   :config
   (pdf-tools-install))
+
+
+;; Test aesthetic
+
+;; Fonts
+(setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 15 :weight 'regular)
+      doom-variable-pitch-font (font-spec :family "Iosevka Aile" :size 16)
+      doom-big-font (font-spec :family "JetBrainsMono Nerd Font" :size 22))
+
+;; Enable font ligatures
+(use-package! ligature
+  :config
+  (ligature-set-ligatures 't '("www" "**" "***" "==" "===" "!=" "!==" "=>" "->" "<-" "<=>" "<=" ">="))
+  (global-ligature-mode t))
+
+;; Theme (light + dark switch)
+(setq doom-theme 'doom-gruvbox)
+;; Optional: cycle themes with a keybind
+(map! :leader "t t" #'counsel-load-theme)
+
+;; Modeline
+(use-package! doom-modeline
+  :init (doom-modeline-mode 1)
+  :custom
+  (doom-modeline-height 25)
+  (doom-modeline-bar-width 3)
+  (doom-modeline-major-mode-icon t)
+  (doom-modeline-buffer-file-name-style 'truncate-upto-project))
+
+;; Icon support
+(use-package! all-the-icons)
+
+;; Transparent titlebar for macOS/Linux + rounded look
+(setq default-frame-alist
+      '((internal-border-width . 15)
+        (left-fringe . 10)
+        (right-fringe . 10)))
+
+;; Smooth scrolling
+(pixel-scroll-precision-mode 1)
+
+;; Rainbow delimiters
+(use-package! rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+;; Highlight TODOs nicely
+(use-package! hl-todo
+  :hook (prog-mode . hl-todo-mode))
+
+;; Tree-sitter syntax highlighting
+(use-package! treesit-auto
+  :config
+  (global-treesit-auto-mode))
+
+;; Prettify symbols (λ, ∑, etc.)
+(global-prettify-symbols-mode 1)
+
+;; Company (completion)
+(after! company
+  (setq company-idle-delay 0.1        ;; how quickly suggestions pop up
+        company-minimum-prefix-length 1
+        company-show-numbers t
+        company-tooltip-limit 15
+        company-tooltip-align-annotations t
+        company-tooltip-flip-when-above t))
+
+;; Make completion UI pretty
+(use-package! company-box
+  :hook (company-mode . company-box-mode)
+  :config
+  (setq company-box-icons-alist 'company-box-icons-all-the-icons
+        company-box-backends-colors nil
+        company-box-max-candidates 50))
+
+;; Optional: Use icons in completion popup
+(use-package! all-the-icons
+  :if (display-graphic-p))
+
+;; Extra sources for company (like cape would add)
+(use-package! company-math   ;; LaTeX, symbols, math mode
+  :after company
+  :config
+  (add-to-list 'company-backends 'company-math-symbols-unicode)
+  (add-to-list 'company-backends 'company-math-symbols-latex))
+
+(use-package! company-dabbrev
+  :after company
+  :config
+  (setq company-dabbrev-downcase nil
+        company-dabbrev-ignore-case t
+        company-dabbrev-minimum-length 3))
+
+;; LSP UI polish
+(after! lsp-mode
+  (setq lsp-headerline-breadcrumb-enable t
+        lsp-ui-sideline-enable t
+        lsp-ui-doc-enable t))
+
+
+
+
+;; Org modern (better fonts, spacing)
+(use-package! org-modern
+  :hook (org-mode . org-modern-mode))
+
+;; Pretty bullets
+(use-package! org-superstar
+  :hook (org-mode . org-superstar-mode))
+
+;; Org agenda polishing
+(setq org-agenda-block-separator ?─
+      org-agenda-time-grid '((daily today require-timed)
+                             (800 1000 1200 1400 1600 1800 2000))
+      org-agenda-current-time-string "⭠ now ─────────────────────────────")
+
+;; Variable-pitch mode in org
+(add-hook 'org-mode-hook 'variable-pitch-mode)
+
+;; Org export aesthetic (HTML + LaTeX)
+(setq org-html-htmlize-output-type 'css
+      org-latex-packages-alist '(("" "booktabs" t)
+                                 ("" "amsmath" t)
+                                 ("" "amssymb" t)))
+
+;; PDF tools
+(use-package! pdf-tools
+  :config
+  (pdf-tools-install)
+  (setq-default pdf-view-display-size 'fit-page))
+
+;; Annotations
+(use-package! org-noter
+  :after pdf-tools
+  :config
+  (setq org-noter-notes-search-path '("~/org/notes/")))
+
+;; EPUB reader
+(use-package! nov
+  :mode ("\\.epub\\'" . nov-mode))
